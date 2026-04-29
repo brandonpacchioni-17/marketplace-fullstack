@@ -5,7 +5,14 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [products, setProducts] = useState([]);
 
+  const API_URL = "https://marketplace-fullstack-0xuz.onrender.com";
+
   const [loginData, setLoginData] = useState({
+    username: "",
+    password: ""
+  });
+
+  const [registerData, setRegisterData] = useState({
     username: "",
     password: ""
   });
@@ -16,7 +23,6 @@ function App() {
     price: ""
   });
 
-  // Manejar inputs de login
   const handleLoginChange = (e) => {
     setLoginData({
       ...loginData,
@@ -24,57 +30,66 @@ function App() {
     });
   };
 
-  // Login
+  const handleRegisterChange = (e) => {
+    setRegisterData({
+      ...registerData,
+      [e.target.name]: e.target.value
+    });
+  };
+
   const login = async () => {
-  try {
-    const res = await axios.post(
-      "https://marketplace-fullstack-0xuz.onrender.com/api/token/",
-      {
-        username: loginData.username,
-        password: loginData.password
-      }
-    );
+    try {
+      const res = await axios.post(`${API_URL}/api/token/`, loginData);
 
-    localStorage.setItem("token", res.data.access);
-    setToken(res.data.access);
+      localStorage.setItem("token", res.data.access);
+      setToken(res.data.access);
 
-  } catch (error) {
-    console.log("ERROR LOGIN:", error.response?.data || error.message);
-  }
-};
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+    }
+  };
 
-  // Logout
+  const register = async () => {
+    try {
+      await axios.post(`${API_URL}/api/register/`, registerData);
+      alert("Usuario creado");
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     setProducts([]);
   };
 
-  // Obtener productos
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(
-        "http://127.0.0.1:8000/api/products/",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.get(`${API_URL}/api/products/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       setProducts(res.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // Cargar productos cuando hay token
   useEffect(() => {
-    if (token) {
+    if (!token) return;
+
+    fetchProducts();
+
+    const interval = setInterval(() => {
       fetchProducts();
-    }
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [token]);
 
-  // Manejar inputs de producto
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -82,13 +97,12 @@ function App() {
     });
   };
 
-  // Crear producto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       await axios.post(
-        "http://127.0.0.1:8000/api/products/",
+        `${API_URL}/api/products/`,
         {
           name: form.name,
           description: form.description,
@@ -110,7 +124,7 @@ function App() {
       });
 
     } catch (err) {
-      console.log("ERROR:", err.response?.data || err.message);
+      console.log(err.response?.data || err.message);
     }
   };
 
@@ -118,86 +132,50 @@ function App() {
     <div style={{ padding: "20px" }}>
       <h1>Marketplace</h1>
 
-      {/* Login */}
+      {/* LOGIN */}
       {!token && (
         <>
           <h2>Login</h2>
 
-          <input
-            name="username"
-            placeholder="Username"
-            value={loginData.username}
-            onChange={handleLoginChange}
-          />
-          <br />
+          <input name="username" value={loginData.username} onChange={handleLoginChange} />
+          <input name="password" type="password" value={loginData.password} onChange={handleLoginChange} />
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={loginData.password}
-            onChange={handleLoginChange}
-          />
-          <br />
-
-          <button onClick={login}>Iniciar sesión</button>
+          <button onClick={login}>Login</button>
 
           <hr />
+
+          {/* REGISTER SOLO SI NO LOGEADO */}
+          <h2>Register</h2>
+
+          <input name="username" value={registerData.username} onChange={handleRegisterChange} />
+          <input name="password" type="password" value={registerData.password} onChange={handleRegisterChange} />
+
+          <button onClick={register}>Register</button>
         </>
       )}
 
-      {/* Zona autenticada */}
+      {/* LOGGED */}
       {token && (
         <>
-          <button onClick={logout} style={{ marginBottom: "20px" }}>
-            Logout
-          </button>
+          <button onClick={logout}>Logout</button>
 
-          <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
-            <input
-              name="name"
-              placeholder="Nombre"
-              value={form.name}
-              onChange={handleChange}
-            />
-            <br />
+          <form onSubmit={handleSubmit}>
+            <input name="name" value={form.name} onChange={handleChange} />
+            <input name="description" value={form.description} onChange={handleChange} />
+            <input name="price" value={form.price} onChange={handleChange} />
 
-            <input
-              name="description"
-              placeholder="Descripción"
-              value={form.description}
-              onChange={handleChange}
-            />
-            <br />
-
-            <input
-              name="price"
-              placeholder="Precio"
-              value={form.price}
-              onChange={handleChange}
-            />
-            <br />
-
-            <button type="submit">Publicar producto</button>
+            <button type="submit">Crear</button>
           </form>
+
+          {products.map(p => (
+            <div key={p.id}>
+              <h3>{p.name}</h3>
+              <p>{p.description}</p>
+              <strong>{p.price}</strong>
+            </div>
+          ))}
         </>
       )}
-
-      {/* Lista de productos */}
-      {token && products.map((p) => (
-        <div
-          key={p.id}
-          style={{
-            border: "1px solid #ccc",
-            margin: "10px",
-            padding: "10px"
-          }}
-        >
-          <h3>{p.name}</h3>
-          <p>{p.description}</p>
-          <strong>S/ {p.price}</strong>
-        </div>
-      ))}
     </div>
   );
 }
