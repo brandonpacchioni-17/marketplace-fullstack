@@ -132,12 +132,3 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
 }
-
-import os
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-if os.environ.get('RENDER') == 'true':
-    if not User.objects.filter(username='admin').exists():
-        User.objects.create_superuser('admin', 'admin@example.com', '12345678')
