@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
@@ -10,7 +9,7 @@ def main():
     try:
         from django.core.management import execute_from_command_line
 
-        # 🔥 IMPORTANTE: importar después de cargar Django
+        # IMPORTANTE: importar después de cargar Django
         from django.contrib.auth import get_user_model
 
         User = get_user_model()
