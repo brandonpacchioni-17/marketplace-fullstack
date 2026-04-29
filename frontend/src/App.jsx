@@ -26,18 +26,22 @@ function App() {
 
   // Login
   const login = async () => {
-    try {
-      const res = await axios.post("https://marketplace-fullstack-0xuz.onrender.com", {
+  try {
+    const res = await axios.post(
+      "https://marketplace-fullstack-0xuz.onrender.com/api/token/",
+      {
         username: loginData.username,
         password: loginData.password
-      });
+      }
+    );
 
-      localStorage.setItem("token", res.data.access);
-      setToken(res.data.access);
-    } catch (error) {
-      console.log("ERROR LOGIN:", error.response?.data || error.message);
-    }
-  };
+    localStorage.setItem("token", res.data.access);
+    setToken(res.data.access);
+
+  } catch (error) {
+    console.log("ERROR LOGIN:", error.response?.data || error.message);
+  }
+};
 
   // Logout
   const logout = () => {
