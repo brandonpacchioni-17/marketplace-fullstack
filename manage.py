@@ -9,12 +9,24 @@ def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:
         from django.core.management import execute_from_command_line
+
+        # 🔥 IMPORTANTE: importar después de cargar Django
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+
+        if not User.objects.filter(username='admin').exists():
+            User.objects.create_superuser(
+                'admin',
+                'admin@example.com',
+                '12345678'
+            )
+
     except ImportError as exc:
         raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            "available on your PYTHONPATH environment variable? Did you "
-            "forget to activate a virtual environment?"
+            "Couldn't import Django..."
         ) from exc
+
     execute_from_command_line(sys.argv)
 
 
