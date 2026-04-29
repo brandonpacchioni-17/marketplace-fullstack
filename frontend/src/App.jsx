@@ -66,7 +66,7 @@ function App() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/products/`, {
+      const res = await axios.get(`${API_URL}/api/products`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -102,7 +102,7 @@ function App() {
 
     try {
       await axios.post(
-        `${API_URL}/api/products/`,
+        `${API_URL}/api/products`,
         {
           name: form.name,
           description: form.description,
