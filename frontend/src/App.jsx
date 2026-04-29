@@ -27,7 +27,7 @@ function App() {
   // Login
   const login = async () => {
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/token/", {
+      const res = await axios.post("https://marketplace-fullstack-0xuz.onrender.com", {
         username: loginData.username,
         password: loginData.password
       });
